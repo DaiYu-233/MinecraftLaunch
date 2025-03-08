@@ -16,6 +16,7 @@ public record LaunchConfig {
     public JavaEntry JavaPath { get; set; }
     public string LauncherName { get; set; }
     public string NativesFolder { get; set; }
+    public string Server { get; set; } = string.Empty;
 
     public IEnumerable<string> JvmArguments { get; set; } = [];
 }

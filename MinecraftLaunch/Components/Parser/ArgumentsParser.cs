@@ -87,7 +87,7 @@ public sealed class ArgumentsParser {
             ?? throw new JsonException("Failed to parse version.json");
 
         var vmParameters = JvmArgumentParser.Parse(entity);
-        var gameParameters = GameArgumentParser.Parse(entity);
+        var gameParameters = GameArgumentParser.Parse(entity, LaunchConfig.Server, 25565);
 
         if (MinecraftEntry is ModifiedMinecraftEntry { HasInheritance: true } inst) {
             var inheritedVersionEntry = JsonNode.Parse(File.ReadAllText(inst.InheritedMinecraft.ClientJsonPath))
@@ -98,9 +98,7 @@ public sealed class ArgumentsParser {
                 .Parse(inheritedVersionEntry)
                 .Union(vmParameters);
 
-            gameParameters = GameArgumentParser
-                .Parse(inheritedVersionEntry)
-                .Union(gameParameters);
+            gameParameters = GameArgumentParser.Parse(entity, LaunchConfig.Server, 25565);
         }
 
         var classPath = string.Join(Path.PathSeparator, _libraries.Select(lib => lib.FullPath));
@@ -158,11 +156,6 @@ public sealed class ArgumentsParser {
                 { "${assets_index_name}" , assetIndexFilename },
         };
 
-        if (LaunchConfig.Width != 0 && LaunchConfig.Height != 0) {
-            yield return $"--width {LaunchConfig.Width}";
-            yield return $"--height {LaunchConfig.Height}";
-        }
-
         var parentFolderPath = Directory.GetParent(MinecraftEntry.MinecraftFolderPath)?.FullName
             ?? throw new InvalidOperationException("Invalid Minecraft folder path");
 
@@ -178,6 +171,13 @@ public sealed class ArgumentsParser {
         yield return entity.MainClass!;
 
         foreach (var arg in gameParameters) yield return arg.ReplaceFromDictionary(gameParametersReplace);
+
+
+        if (LaunchConfig.Width != 0 && LaunchConfig.Height != 0)
+        {
+            yield return $"--width {LaunchConfig.Width}";
+            yield return $"--height {LaunchConfig.Height}";
+        }
         //foreach (var arg in _extraGameArguments) yield return arg;
     }
 }
@@ -190,14 +190,18 @@ internal sealed class GameArgumentParser {
     /// 解析参数
     /// </summary>
     /// <returns></returns>
-    public static IEnumerable<string> Parse(MinecraftJsonEntry gameJsonEntry) {
-        if (!string.IsNullOrEmpty(gameJsonEntry.MinecraftArguments)) {
-            foreach (var arg in gameJsonEntry.MinecraftArguments.Split(' ').GroupArguments()) {
+    public static IEnumerable<string> Parse(MinecraftJsonEntry gameJsonEntry, string server = null, int port = 25565)
+    {
+        if (!string.IsNullOrEmpty(gameJsonEntry.MinecraftArguments))
+        {
+            foreach (var arg in gameJsonEntry.MinecraftArguments.Split(' ').GroupArguments())
+            {
                 yield return arg;
             }
         }
 
-        if (gameJsonEntry.Arguments?.GetEnumerable("game") is null) {
+        if (gameJsonEntry.Arguments?.GetEnumerable("game") is null)
+        {
             yield break;
         }
 
@@ -206,8 +210,16 @@ internal sealed class GameArgumentParser {
             .Select(x => x.GetString().ToPath())
             .GroupArguments();
 
-        foreach (var item in game.ToImmutableArray()) {
+        foreach (var item in game.ToImmutableArray())
+        {
             yield return item;
+        }
+
+        if (!string.IsNullOrEmpty(server))
+        {
+            yield return $"--server {server}";
+            yield return $"--port {port}";
+            yield return $"--quickPlayMultiplayer {server}";
         }
     }
 }
