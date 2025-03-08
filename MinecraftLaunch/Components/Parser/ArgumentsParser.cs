@@ -158,8 +158,13 @@ public sealed class ArgumentsParser {
                 { "${assets_index_name}" , assetIndexFilename },
         };
 
+        if (LaunchConfig.Width != 0 && LaunchConfig.Height != 0) {
+            yield return $"--width {LaunchConfig.Width}";
+            yield return $"--height {LaunchConfig.Height}";
+        }
+
         var parentFolderPath = Directory.GetParent(MinecraftEntry.MinecraftFolderPath)?.FullName
-            ?? throw new InvalidOperationException("Invalid Minecraft folder path"); // QUESTION: is this needed?
+            ?? throw new InvalidOperationException("Invalid Minecraft folder path");
 
         yield return $"-Xms{LaunchConfig.MinMemorySize}M";
         yield return $"-Xmx{LaunchConfig.MaxMemorySize}M";
