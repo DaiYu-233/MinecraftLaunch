@@ -8,6 +8,8 @@ public record LaunchConfig {
     public bool IsFullscreen { get; set; }
     public bool IsEnableIndependency { get; set; } = true;
 
+    public int Width { get; set; } = 854;
+    public int Height { get; set; } = 400;
     public int MinMemorySize { get; set; }
     public int MaxMemorySize { get; set; } = 1024;
 

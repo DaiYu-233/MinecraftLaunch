@@ -4,6 +4,7 @@ using MinecraftLaunch.Base.Utilities;
 using MinecraftLaunch.Extensions;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
 namespace MinecraftLaunch.Utilities;
@@ -23,7 +24,7 @@ public static partial class JavaUtil {
         });
 
         string text = process.StandardError.ReadToEnd()?.ToLower();
-        if(string.IsNullOrEmpty(text))
+        if (string.IsNullOrEmpty(text))
             throw new ArgumentNullException();
 
         bool is64bit = text.Contains("64-bit");
@@ -31,18 +32,22 @@ public static partial class JavaUtil {
             .Match(text).Groups[1].Value
             .Split('_')?.FirstOrDefault();
 
-        string javaType = text.Contains("java(tm)") 
+        string javaType = text.Contains("java(tm)")
             ? "Java"
             : text.Contains("zulu")
                 ? "ZuluJDK"
                 : "OpenJDK";
 
         await process.WaitForExitAsync(cancellationToken);
+        var _ = int.TryParse(javaVersion, out var version);
+
         return new JavaEntry {
             Is64bit = is64bit,
             JavaPath = javaPath,
             JavaType = javaType,
-            JavaVersion = new(javaVersion),
+            JavaVersion = version is 0 && !string.IsNullOrWhiteSpace(javaVersion) 
+                ? new(javaVersion) 
+                : new(version, 0),
         };
     }
 
@@ -89,12 +94,10 @@ public static partial class JavaUtil {
 
     #region Privates
 
-    [GeneratedRegex(@"\b(openjdk|java)\b")]
-    private static partial Regex JavaTypeRegex();
-
-    [GeneratedRegex(@"version\s+""([\d._]+)""")]
+    [GeneratedRegex(@"version\s+""([\d]+)""")]
     private static partial Regex JavaVersionRegex();
 
+    [SupportedOSPlatform("Windows")]
     private static IEnumerable<string> GetJavasForWindows() {
         //Use by:https://github.com/Xcube-Studio/Natsurainko.FluentCore/blob/main/Natsurainko.FluentCore/Environment/JavaUtils.cs
         List<string> result = [];
@@ -117,7 +120,7 @@ public static partial class JavaUtil {
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
 
-        var output = new List<string?>();
+        var output = new List<string>();
 
         process.OutputDataReceived += (sender, e) => output.Add(e.Data);
         process.ErrorDataReceived += (sender, e) => output.Add(e.Data);

@@ -100,7 +100,7 @@ public sealed class LauncherProfileParser {
 
     #region Privates
 
-    private JsonSerializerOptions Get() {
+    internal static JsonSerializerOptions Get() {
         var options = new JsonSerializerOptions {
             MaxDepth = 100,
             WriteIndented = true,
@@ -108,7 +108,7 @@ public sealed class LauncherProfileParser {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             Converters = {
                 new DateTimeJsonConverter()
-            }
+            }, 
         };
         
         return options;

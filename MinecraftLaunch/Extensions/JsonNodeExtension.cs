@@ -55,6 +55,14 @@ public static class JsonNodeExtension {
         return node.Select(name)?.GetValue<string>();
     }
 
+    public static DateTime GetDateTime(this JsonNode node) {
+        return node.GetValue<DateTime>();
+    }
+
+    public static DateTime GetDateTime(this JsonNode node, string name) {
+        return node.Select(name).GetValue<DateTime>();
+    }
+
     public static JsonArray GetEnumerable(this JsonNode node) {
         return node.AsArray();
     }

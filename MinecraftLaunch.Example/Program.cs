@@ -151,6 +151,15 @@ HttpUtil.Initialize();
 
 #endregion
 
+#region Curseforge API
+
+//var curseforgeProvider = new CurseforgeProvider("$2a$10$Awb53b9gSOIJJkdV3Zrgp.CyFP.dI13QKbWn/4UZI4G4ff18WneB6");
+//await foreach (var cfResource in curseforgeProvider.GetFeaturedResourcesAsync()) {
+//    Console.WriteLine(cfResource.Name);
+//}
+
+#endregion
+
 #region 微软验证
 
 //MicrosoftAuthenticator authenticator = new("Your client ID");
