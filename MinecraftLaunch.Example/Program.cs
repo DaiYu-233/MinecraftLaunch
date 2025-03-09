@@ -22,16 +22,16 @@ CurseforgeProvider.CurseforgeApiKey = "Your Api Key";
 HttpUtil.Initialize();
 
 #region 原版安装器
+/*
+var entry = await VanillaInstaller.EnumerableMinecraftAsync()
+    .FirstAsync(x => x.Id == "1.20.1");
 
-//var entry = await VanillaInstaller.EnumerableMinecraftAsync()
-//    .FirstAsync(x => x.Id == "1.20.1");
+var installer = VanillaInstaller.Create(".minecraft", entry);
+installer.ProgressChanged += (_, arg) =>
+    Console.WriteLine($"{arg.StepName} - {arg.FinishedStepTaskCount}/{arg.TotalStepTaskCount} - {(arg.IsStepSupportSpeed ? $"{FileDownloader.GetSpeedText(arg.Speed)} - {arg.Progress * 100:0.00}%" : $"{arg.Progress * 100:0.00}%")}");
 
-//var installer = VanillaInstaller.Create("C:\\Users\\wxysd\\Desktop\\temp\\DaiYu\\.minecraft", entry);
-//installer.ProgressChanged += (_, arg) =>
-//    Console.WriteLine($"{arg.StepName} - {arg.FinishedStepTaskCount}/{arg.TotalStepTaskCount} - {(arg.IsStepSupportSpeed ? $"{FileDownloader.GetSpeedText(arg.Speed)} - {arg.Progress * 100:0.00}%" : $"{arg.Progress * 100:0.00}%")}");
-
-//var minecraft = await installer.InstallAsync();
-//Console.WriteLine(minecraft.Id);
+var minecraft = await installer.InstallAsync();
+Console.WriteLine(minecraft.Id);*/
 
 #endregion
 
@@ -192,7 +192,7 @@ HttpUtil.Initialize();
 #region 本地游戏读取
 
 //C:\Users\wxysd\Desktop\总整包\MC\mc启动器\LauncherX\.minecraft - C:\Users\wxysd\Desktop\temp\.minecraft
-MinecraftParser minecraftParser = @"C:\Users\wxysd\Desktop\总整包\MC\mc启动器\LauncherX\.minecraft";
+MinecraftParser minecraftParser = @".minecraft";
 
 //minecraftParser.GetMinecrafts().ForEach(x => {
 //    Console.WriteLine(x.Id);
@@ -228,18 +228,24 @@ MinecraftParser minecraftParser = @"C:\Users\wxysd\Desktop\总整包\MC\mc启动
 
 #region 启动
 
-//MinecraftRunner runner = new(new LaunchConfig {
-//    Account = new OfflineAuthenticator().Authenticate("Yang114"),
-//    JavaPath = minecraft5.GetAppropriateJava((await JavaUtil.EnumerableJavaAsync().ToListAsync())),
-//    MaxMemorySize = 2048,
-//    MinMemorySize = 512,
-//    LauncherName = "MinecraftLaunch"
-//}, minecraftParser);
+MinecraftRunner runner = new(new LaunchConfig {
+    Account = new OfflineAuthenticator().Authenticate("Yang114"),
+    JavaPath = new JavaEntry
+    {
+        Is64bit = true,
+        JavaPath = "C:\\Program Files\\Java\\jdk-19\\bin\\javaw.exe",
+        JavaVersion = new Version(19,2),
+    },
+    MaxMemorySize = 2048,
+    MinMemorySize = 512,
+    LauncherName = "MinecraftLaunch",
+    Server = "mc.hypixel.net"
+}, minecraftParser);
 
-//var process = await runner.RunAsync(minecraft5);
-//process.Started += (_, _) => Console.WriteLine("Launch successful!");
-//process.OutputLogReceived += (_, arg) => Console.WriteLine(arg.Data);
-//process.Exited += (_, _) => Console.WriteLine(string.Join("\n", process.ArgumentList));
+var process = await runner.RunAsync(minecraftParser.GetMinecraft("1.20.1"));
+process.Started += (_, _) => Console.WriteLine("Launch successful!");
+process.OutputLogReceived += (_, arg) => Console.WriteLine(arg.Data);
+process.Exited += (_, _) => File.WriteAllText("a.bat", process.Process.StartInfo.Arguments);
 
 #endregion
 
